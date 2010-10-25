@@ -1,0 +1,227 @@
+<html>
+<style>
+.skin-select {
+	position: relative;
+	background-image: url(combo.png);
+	background-position: 0px -30px;
+	height: 28px;
+	cursor: arrow;
+}
+
+.skin-left {
+	float: left;
+	width: 29px;
+	background-position: 0px 0px;
+	background-repeat: no-repeat;
+}
+
+.skin-left span {
+	display: block;
+	position: absolute;
+	top: 0px;
+	margin-top: 4px;
+	margin-left: 12px;
+}
+
+
+.skin-right {
+	position: absolute;
+	right: 0px;
+	z-index: 0;
+	float: right;
+	width: 30px;
+	background-position: 0px -60px;
+	background-repeat: no-repeat;
+}
+
+
+.skin-select-hover {
+	background-position: 0px -120px;
+}
+
+.skin-select-hover .skin-left {
+	background-position: 0px -90px;
+}
+
+
+.skin-select-hover .skin-right {
+	background-position: 0px -150px;
+}
+
+.skin-select-active {
+	background-position: 0px -211px;
+	color: white;
+}
+
+.skin-select-active .skin-left {
+	background-position: 0px -181px;
+}
+
+.skin-select-active .skin-right {
+	background-position: 0px -241px;
+}
+
+.skin-select select {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	opacity: 0;
+	filter:alpha(opacity='0');
+	
+	height: 100%;
+	font-size: 18px;
+	z-index: 2;
+}
+
+.grid1 {
+	
+}
+</style>
+<script type="text/javascript" src="jquery-1.4.3.min.js">
+</script>
+<script>
+$(function() {
+	$.skinSelect = function(el) {
+		var htmlTemplate = '<div class="skin-select"></div>';
+		var htmlBefore = '<span class="skin-select skin-left"><span></span></span>';
+		var htmlAfter = '<span class="skin-select skin-right"></span>';
+		el.data("skin-select", true);
+		el = el.wrap(htmlTemplate);
+		el.before(htmlBefore);
+		el.after(htmlAfter);
+		var parent = el.parent();
+		var width = el.width();
+		if (width % 2 > 0) {
+			width ++;
+		}
+		parent.width(width + 20);
+		$.skinSelectBinds(parent, el);
+		return parent;
+	}
+	
+	$.skinSelectFocus = function() { 
+		var el = $(this);
+		$.skinSelectHoverOut.call(el);
+		var classCount = el.data('skin-active') || 0;
+		classCount++;
+		el.data('skin-active', classCount);
+		el.addClass("skin-select-active");
+	}
+	
+	$.skinSelectBlur = function() { 
+		var el = $(this);
+		var classCount = el.data('skin-active') || 0;
+		if (classCount > 0) {
+			classCount--;
+			el.data('skin-active', classCount);
+		}
+		if (classCount == 0) {
+			el.removeClass("skin-select-active");
+		}
+	} 
+	
+	$.skinSelectHoverIn = function() { 
+		var el = $(this);
+		var classCount = el.data('skin-hover') || 0;
+		var classActiveCount = el.data('skin-active') || 0;
+		if (classActiveCount == 0) {
+			classCount++;
+			el.data('skin-hover', classCount);
+			el.addClass("skin-select-hover");
+		}
+	}
+	
+	$.skinSelectHoverOut = function() { 
+		var el = $(this);
+		var classCount = el.data('skin-hover') || 0;
+		if (classCount > 0) {
+			classCount--;
+			el.data('skin-hover', classCount);
+		}
+		if (classCount == 0) {
+			el.removeClass("skin-select-hover");
+		}
+	}
+	
+	$.skinSelectChange = function() {
+		$(this).prev(".skin-left").find("span").text($("option:selected", this).text());
+	}
+	
+	$.skinSelectBinds = function (parent, el) {
+		parent.bind('focusin', $.skinSelectFocus);
+		parent.bind('focusout', $.skinSelectBlur);
+		parent.hover($.skinSelectHoverIn, $.skinSelectHoverOut);
+		el.bind('change keyup keydown click', $.skinSelectChange);
+		el.bind('blur', $.skinSelectBlur);
+		$.skinSelectChange.call(el);
+	}
+
+	$.fn.skin = function (opts) {
+		return $(this).each(function() {
+			var me = $(this);
+			if (me.context.tagName == 'SELECT') {
+				return $.skinSelect(me);
+			}
+		});
+	}
+	
+	$.fn.__val = $.fn.val;
+	
+	$.fn.val = function () {
+		var el = $(this);
+		var ret = $.fn.__val.apply(this, arguments);
+		if (el.data("skin-select")) {
+			el.each(function () {
+				$.skinSelectChange.call(this);
+			});
+		}
+		return ret;
+	};
+
+	$("select.transform").skin();
+	$("#combo3").bind('change blur keyup', function() {
+		$("select").val($(this).val());
+	});
+});
+</script>
+<body>
+
+<div class="grid1">
+	<select id="combo1" class="transform" style="width: 200px">
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+	</select>
+	<select id="combo_1" style="width: 200px">
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+	</select>
+	<select id="combo2" class="transform"  style="width: 50%">
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+	</select>
+	<select id="combo_2" style="width: 50%">
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+	</select>
+	<select id="combo3" class="transform" >
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+		<option value="2011">2011</option>
+	</select>
+	<select id="combo_3">
+		<option value="">Selecione</option>
+		<option value="2009">2009</option>
+		<option value="2010">2010</option>
+		<option value="2011">2011</option>
+	</select>
+</div>
+
+<input type="text" id="teste"></input>
+<input type="text" id="teste2"></input>
+</body>
+</html>
